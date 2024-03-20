@@ -22,23 +22,30 @@ public class UserController {
 
     @PostMapping // создание пользователя
     public User addUser(@Valid @RequestBody User userFromRequest) {
+        log.info("Request body: " + userFromRequest.toString());
         User user = userFromRequest.toBuilder()
-                .name(userFromRequest.getName() == null || userFromRequest.getName().isEmpty() ?
+                .name(userFromRequest.getName() == null || userFromRequest.getName().isBlank() ?
                         userFromRequest.getLogin() : userFromRequest.getName())
                 .id(counterId++)
                 .build();
         users.put(user.getId(), user);
+        log.info("Response body: " + user.toString());
         return user;
     }
 
     @PutMapping // обновление пользователя
     public User updateUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
-            if (user.getName().isEmpty()) user.setName(user.getLogin());
+            log.info("Request body: " + user.toString());
+            if (user.getName().isBlank()) user.setName(user.getLogin());
             users.replace(user.getId(), user);
+            log.info("Response body: " + user.toString());
             return user;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film with such id was not found.");
+            String message = "User with such id was not found.";
+            log.info("Request body: " + user.toString());
+            log.info(message);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with such id was not found.");
         }
     }
 

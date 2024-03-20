@@ -22,20 +22,27 @@ public class FilmController {
 
     @PostMapping // добавление фильма
     public Film addFilm(@Valid @RequestBody Film filmFromRequest) {
+        log.info("Request body: " + filmFromRequest.toString());
         Film film = filmFromRequest.toBuilder()
                 .id(counterId++)
                 .build();
         films.put(film.getId(), film);
+        log.info("Response body: " + film.toString());
         return film;
     }
 
     @PutMapping // обновление фильма
     public Film updateFilm(@Valid @RequestBody Film film) {
         if (films.containsKey(film.getId())) {
+            log.info("Request body: " + film.toString());
             films.replace(film.getId(), film);
+            log.info("Request body: " + film.toString());
             return film;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film with such id was not found.");
+            String message = "Film with such id was not found.";
+            log.info("Request body: " + film.toString());
+            log.info(message);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
     }
 

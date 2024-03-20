@@ -14,13 +14,12 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class Film {
 
-    private int id;
+    private final Integer id;
 
-    @NotNull(message = "Name cannot be null.")
-    @NotEmpty(message = "Name cannot be empty.")
+    @NotBlank(message = "Name cannot be blank.")
     private String name;
 
-    @NotNull(message = "Description cannot be null.")
+    @NotBlank(message = "Description cannot be blank.")
     @Size(max = 200, message = "Description must contain up to 200 characters.")
     private String description;
 

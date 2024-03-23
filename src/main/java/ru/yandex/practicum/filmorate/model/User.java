@@ -20,8 +20,8 @@ public class User {
     @NotBlank(message = "Email cannot be blank.")
     private String email;
 
-    @Login
     @NotBlank(message = "Login cannot be blank.")
+    @Login
     private String login;
 
     private String name;

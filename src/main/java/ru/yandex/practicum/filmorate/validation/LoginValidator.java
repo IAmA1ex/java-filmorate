@@ -6,7 +6,6 @@ import javax.validation.ConstraintValidatorContext;
 public class LoginValidator implements ConstraintValidator<Login, String> {
     @Override
     public boolean isValid(String string, ConstraintValidatorContext constraintValidatorContext) {
-        if (string == null) return false;
         return !string.contains(" ");
     }
 }

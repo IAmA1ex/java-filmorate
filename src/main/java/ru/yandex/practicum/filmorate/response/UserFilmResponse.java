@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.response;
 
-import lombok.Data;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 

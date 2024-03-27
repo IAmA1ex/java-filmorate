@@ -54,19 +54,13 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public UserFilmResponse setLike(@PathVariable("id") Integer filmId,
                                     @PathVariable Integer userId) throws NotFoundException {
-        User user = userStorage.getUser(userId);
-        Film film = filmStorage.getFilm(filmId);
-        filmService.setLike(user, film);
-        return new UserFilmResponse(user, film);
+        return filmService.setLike(userId, filmId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public UserFilmResponse removeLike(@PathVariable("id") Integer filmId,
                                        @PathVariable Integer userId) throws NotFoundException {
-        User user = userStorage.getUser(userId);
-        Film film = filmStorage.getFilm(filmId);
-        filmService.removeLike(user, film);
-        return new UserFilmResponse(user, film);
+        return filmService.removeLike(userId, filmId);
     }
 
     @GetMapping("/popular")

@@ -49,35 +49,25 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public List<User> makeFriends(@PathVariable("id") Integer user1Id,
                                   @PathVariable("friendId") Integer user2Id) throws NotFoundException {
-        User user1 = userStorage.getUser(user1Id);
-        User user2 = userStorage.getUser(user2Id);
-        userService.makeFriends(user1, user2);
-        log.info(Map.of("id", user1Id, "friendId", user2Id, "user1", user1, "user2", user2).toString());
-        return List.of(user1, user2);
+        List<User> friends = userService.makeFriends(user1Id, user2Id);
+        log.info(Map.of("id", user1Id, "friendId", user2Id, "user1",
+                friends.get(0), "user2", friends.get(1)).toString());
+        return friends;
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public List<User> removeFriends(@PathVariable("id") Integer user1Id,
                                     @PathVariable("friendId") Integer user2Id) throws NotFoundException {
-        User user1 = userStorage.getUser(user1Id);
-        User user2 = userStorage.getUser(user2Id);
-        userService.removeFriends(user1, user2);
-        log.info(Map.of("id", user1Id, "friendId", user2Id, "user1", user1, "user2", user2).toString());
-        return List.of(user1, user2);
+        List<User> friends = userService.removeFriends(user1Id, user2Id);
+        log.info(Map.of("id", user1Id, "friendId", user2Id, "user1",
+                friends.get(0), "user2", friends.get(1)).toString());
+        return friends;
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getAllFriend(@PathVariable("id") Integer userId) throws NotFoundException {
+    public List<User> getAllFriends(@PathVariable("id") Integer userId) throws NotFoundException {
         User user = userStorage.getUser(userId);
-        List<User> friends = user.getFriends().stream()
-                .map(id -> {
-                    try {
-                        return userStorage.getUser(id);
-                    } catch (NotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+        List<User> friends = userService.getFriends(userId);
         log.info(Map.of("user", user, "friends", friends).toString());
         return friends;
     }
@@ -85,13 +75,11 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable("id") Integer user1Id,
                                        @PathVariable("otherId") Integer user2Id) throws NotFoundException {
-        User user1 = userStorage.getUser(user1Id);
-        User user2 = userStorage.getUser(user2Id);
-        List<User> commonFriends = userService.getCommonFriends(user1, user2);
+        List<User> commonFriends = userService.getCommonFriends(user1Id, user2Id);
         log.info(Map.of("id", user1Id,
                 "otherId", user2Id,
-                "user1", user1,
-                "user2", user2,
+                "user1", userStorage.getUser(user1Id),
+                "user2", userStorage.getUser(user2Id),
                 "common friends", commonFriends).toString());
         return commonFriends;
     }

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.SameObjectsException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -48,7 +49,7 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public List<User> makeFriends(@PathVariable("id") Integer user1Id,
-                                  @PathVariable("friendId") Integer user2Id) throws NotFoundException {
+                                  @PathVariable("friendId") Integer user2Id) throws NotFoundException, SameObjectsException {
         List<User> friends = userService.makeFriends(user1Id, user2Id);
         log.info(Map.of("id", user1Id, "friendId", user2Id, "user1",
                 friends.get(0), "user2", friends.get(1)).toString());
@@ -74,7 +75,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable("id") Integer user1Id,
-                                       @PathVariable("otherId") Integer user2Id) throws NotFoundException {
+                                       @PathVariable("otherId") Integer user2Id) throws NotFoundException, SameObjectsException {
         List<User> commonFriends = userService.getCommonFriends(user1Id, user2Id);
         log.info(Map.of("id", user1Id,
                 "otherId", user2Id,

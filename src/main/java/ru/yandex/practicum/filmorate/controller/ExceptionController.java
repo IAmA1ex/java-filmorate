@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.SameObjectsException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.util.LinkedHashMap;
@@ -25,7 +26,7 @@ public class ExceptionController {
     public Map<String, Object> badRequest(final ValidationException e) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("error", e.getMessage());
-        log.info("MethodArgumentNotValidException. Response: " + response);
+        log.info("ValidationException. Response: " + response);
         return response;
     }
 
@@ -42,11 +43,20 @@ public class ExceptionController {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, Object> badRequest(final SameObjectsException e) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("error", e.getMessage());
+        log.info("SameObjectsException. Response: " + response);
+        return response;
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, Object> notFound(final NotFoundException e) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("error", e.getMessage());
-        log.info("MethodArgumentNotValidException. Response: " + response);
+        log.info("NotFoundException. Response: " + response);
         return response;
     }
 
@@ -55,7 +65,7 @@ public class ExceptionController {
     public Map<String, Object> internalServerError(final Exception e) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("error", e.getMessage());
-        log.info("MethodArgumentNotValidException. Response: " + response);
+        log.info("Exception. Response: " + response);
         return response;
     }
 }

@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,19 +17,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmStorage filmStorage, UserStorage userStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.filmService = filmService;
-    }
 
     @PostMapping // добавление фильма
     public Film addFilm(@Valid @RequestBody Film filmFromRequest) {

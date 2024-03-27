@@ -31,4 +31,6 @@ public class Film {
     @Positive(message = "Duration cannot be negative.")
     private int duration;
 
+    private int likes = 0;
+
 }

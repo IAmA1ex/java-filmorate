@@ -3,7 +3,7 @@
 Проект курса Yandex Practicum.
 
 ### Схема базы данных
-![Схема базы данных](src/main/java/ru/yandex/practicum/filmorate/erd/erd.png)
+![Схема базы данных](src/main/java/ru/yandex/practicum/filmorate/erd/erd_2.png)
 
 ### Примеры запросов:
 

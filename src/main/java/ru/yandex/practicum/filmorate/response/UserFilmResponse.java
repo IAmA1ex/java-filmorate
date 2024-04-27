@@ -12,4 +12,12 @@ public class UserFilmResponse {
         this.user = user;
         this.film = film;
     }
+
+    @Override
+    public String toString() {
+        return "UserFilmResponse{" +
+                "user=" + user +
+                ", film=" + film +
+                '}';
+    }
 }

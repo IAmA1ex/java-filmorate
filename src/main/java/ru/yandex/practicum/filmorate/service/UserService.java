@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.SameObjectsException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,23 +16,35 @@ public class UserService {
 
     private final UserStorage userStorage;
 
-    public List<User> makeFriends(Integer user1Id, Integer user2Id) throws NotFoundException, SameObjectsException {
-        if (!user1Id.equals(user2Id)) {
-            User u1 = userStorage.getUser(user1Id);
-            User u2 = userStorage.getUser(user2Id);
-            u1.getFriends().add(u2.getId());
-            u2.getFriends().add(u1.getId());
-            return List.of(u1, u2);
+    public List<User> makeFriends(Integer userId1, Integer userId2) throws NotFoundException, SameObjectsException {
+        if (!userId1.equals(userId2)) {
+            if (userStorage.dbContainsUser(userId1) && userStorage.dbContainsUser(userId2)) {
+                Map<Integer, Integer> friendsStatus = userStorage.getFriendsStatus(userId1, userId2);
+                if (!friendsStatus.isEmpty()) {
+                    userStorage.updateFriendStatus(userId1, userId2, 1);
+                } else {
+                    userStorage.addFriendStatus(userId1, userId2, 1);
+                    userStorage.addFriendStatus(userId2, userId1, 2);
+                }
+                return List.of(userStorage.getUser(userId1), userStorage.getUser(userId2));
+            }
+            throw new NotFoundException("User not found.");
         }
         throw new SameObjectsException("Identical IDs. The user cannot add himself as a friend.");
     }
 
-    public List<User> removeFriends(Integer user1Id, Integer user2Id) throws NotFoundException {
-        User u1 = userStorage.getUser(user1Id);
-        User u2 = userStorage.getUser(user2Id);
-        u1.getFriends().remove(u2.getId());
-        u2.getFriends().remove(u1.getId());
-        return List.of(u1, u2);
+    public List<User> removeFriends(Integer userId1, Integer userId2) throws NotFoundException, SameObjectsException {
+        if (!userId1.equals(userId2)) {
+            if (userStorage.dbContainsUser(userId1) && userStorage.dbContainsUser(userId2)) {
+                Map<Integer, Integer> friendsStatus = userStorage.getFriendsStatus(userId1, userId2);
+                if (!friendsStatus.isEmpty()) {
+                    userStorage.updateFriendStatus(userId1, userId2, 2);
+                }
+                return List.of(userStorage.getUser(userId1), userStorage.getUser(userId2));
+            }
+            throw new NotFoundException("User not found.");
+        }
+        throw new SameObjectsException("Identical IDs. The user cannot remove himself as a friend.");
     }
 
     public List<User> getCommonFriends(Integer user1Id, Integer user2Id) throws NotFoundException, SameObjectsException {
@@ -62,4 +74,5 @@ public class UserService {
                 })
                 .collect(Collectors.toList());
     }
+
 }

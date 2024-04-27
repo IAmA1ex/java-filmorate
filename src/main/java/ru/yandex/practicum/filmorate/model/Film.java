@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.validation.MovieBirthday;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Film.
@@ -31,6 +33,10 @@ public class Film {
     @Positive(message = "Duration cannot be negative.")
     private int duration;
 
-    private int likes = 0;
+    private int likes;
+
+    private List<Map<String, Object>> genres; // странная конечно структура
+
+    private Map<String, Object> mpa;
 
 }

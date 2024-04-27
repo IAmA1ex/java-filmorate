@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
 
 public class FilmorateApplicationMemoryTest extends FilmorateApplicationTests<InMemoryFilmStorage, InMemoryUserStorage> {
 

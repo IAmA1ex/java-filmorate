@@ -47,9 +47,9 @@ public class FilmController {
     }
 
     @GetMapping("/{id}") // получение фильма
-    public Film getFilm(@PathVariable("id") Integer film_id) throws NotFoundException {
-        log.info(String.format("Request body: film_id = %d.", film_id));
-        Film film = filmStorage.getFilm(film_id);
+    public Film getFilm(@PathVariable("id") Integer filmId) throws NotFoundException {
+        log.info(String.format("Request body: film_id = %d.", filmId));
+        Film film = filmStorage.getFilm(filmId);
         log.info(String.format("Response body: %s", film.toString()));
         return film;
     }

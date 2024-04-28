@@ -141,7 +141,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Map<String, Object>> genres = getGenres(filmId);
         Integer likes = getLikes(filmId);
 
-        if(filmRows.next()) {
+        if (filmRows.next()) {
 
             Map<String, Object> mpa = Map.of("id", filmRows.getInt("rating_mpa_id"),
                     "name", Objects.requireNonNull(filmRows.getString("rating_mpa")));

@@ -69,7 +69,7 @@ public class UserDbStorage implements UserStorage {
                 "FROM users " +
                 "WHERE user_id = ?; ";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
-        if(userRows.next()) {
+        if (userRows.next()) {
             return User.builder()
                     .id(id)
                     .email(userRows.getString("email"))

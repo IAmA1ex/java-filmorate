@@ -35,8 +35,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film addFilm(Film filmFromRequest) throws NotFoundException, BadRequestException {
 
         try {
-            Integer film_id_in_db;
-            Integer rating_mpa_id = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
+            Integer filmIdInDb;
+            Integer ratingMpaId = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
@@ -48,29 +48,29 @@ public class FilmDbStorage implements FilmStorage {
                 ps.setString(2, filmFromRequest.getDescription());
                 ps.setString(3, dateFormat.format(filmFromRequest.getReleaseDate()));
                 ps.setInt(4, filmFromRequest.getDuration());
-                ps.setInt(5, rating_mpa_id);
+                ps.setInt(5, ratingMpaId);
                 return ps;
             }, keyHolder);
-            film_id_in_db = keyHolder.getKeyAs(Integer.class);
+            filmIdInDb = keyHolder.getKeyAs(Integer.class);
 
-            List<Integer> genres_id;
+            List<Integer> genresId;
             try {
-                genres_id = filmFromRequest.getGenres().stream()
+                genresId = filmFromRequest.getGenres().stream()
                         .filter(m -> m != null && m.containsKey("id")
                                 && m.get("id") != null && m.get("id") instanceof Integer)
                         .map(m -> (Integer) m.get("id"))
                         .collect(Collectors.toList());
             } catch (Exception e) {
-                genres_id = Collections.emptyList();
+                genresId = Collections.emptyList();
             }
 
-            for (Integer i : genres_id) {
+            for (Integer i : genresId) {
                 String sql = "INSERT INTO film_genre (film_id, genre_id) " +
                         "VALUES (?, ?); ";
-                jdbcTemplate.update(sql, film_id_in_db, i);
+                jdbcTemplate.update(sql, filmIdInDb, i);
             }
 
-            return getFilm(film_id_in_db);
+            return getFilm(filmIdInDb);
         } catch (Exception e) {
             if (e.getMessage().contains("FOREIGN KEY(RATING_MPA_ID)")) {
                 throw new BadRequestException("MPA id is not found.");
@@ -84,7 +84,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film filmFromRequest) throws NotFoundException, BadRequestException {
 
         try {
-            Integer rating_mpa_id = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
+            Integer ratingMpaId = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
 
             String sql = "UPDATE films " +
                     "SET film_name = ?, description = ?, release_date = ?, duration = ?, rating_mpa_id = ? " +
@@ -93,17 +93,17 @@ public class FilmDbStorage implements FilmStorage {
                     filmFromRequest.getDescription(),
                     dateFormat.format(filmFromRequest.getReleaseDate()),
                     filmFromRequest.getDuration(),
-                    rating_mpa_id,
+                    ratingMpaId,
                     filmFromRequest.getId());
 
             sql = "DELETE FROM film_genre WHERE film_id = ?; ";
             jdbcTemplate.update(sql, filmFromRequest.getId());
 
             if (filmFromRequest.getGenres() != null) {
-                List<Integer> genres_id = filmFromRequest.getGenres().stream()
+                List<Integer> genresId = filmFromRequest.getGenres().stream()
                         .map(m -> (Integer) m.get("id"))
                         .collect(Collectors.toList());
-                for (Integer i : genres_id) {
+                for (Integer i : genresId) {
                     sql = "INSERT INTO film_genre (film_id, genre_id) " +
                             "VALUES (?, ?); ";
                     jdbcTemplate.update(sql, filmFromRequest.getId(), i);
@@ -130,16 +130,16 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
     }
 
-    public Film getFilm(Integer film_id) throws NotFoundException {
+    public Film getFilm(Integer filmId) throws NotFoundException {
 
         String sql = "SELECT * " +
                 "FROM films AS f " +
                 "LEFT JOIN rating_mpa AS r ON f.rating_mpa_id = r.rating_mpa_id " +
                 "WHERE f.film_id = ?; ";
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, film_id);
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, filmId);
 
-        List<Map<String, Object>> genres = getGenres(film_id);
-        Integer likes = getLikes(film_id);
+        List<Map<String, Object>> genres = getGenres(filmId);
+        Integer likes = getLikes(filmId);
 
         if(filmRows.next()) {
 
@@ -148,7 +148,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
             Film film = Film.builder()
-                    .id(film_id)
+                    .id(filmId)
                     .name(filmRows.getString("film_name"))
                     .description(filmRows.getString("description"))
                     .releaseDate(LocalDate.parse(Objects.requireNonNull(filmRows.getString("release_date")), dateFormat))
@@ -162,7 +162,7 @@ public class FilmDbStorage implements FilmStorage {
 
             return film;
         } else {
-            throw new NotFoundException(String.format("Фильм с идентификатором %d не найден.", film_id));
+            throw new NotFoundException(String.format("Фильм с идентификатором %d не найден.", filmId));
         }
     }
 
@@ -174,12 +174,12 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.queryForObject(sql, Integer.class, filmId);
     }
 
-    public List<Map<String, Object>> getGenres(Integer film_id) {
+    public List<Map<String, Object>> getGenres(Integer filmId) {
         String sql = "SELECT g.genre_id, g.genre " +
                 "FROM film_genre AS fg " +
                 "LEFT JOIN genre AS g ON fg.genre_id = g.genre_id " +
                 "WHERE fg.film_id = ?; ";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, film_id);
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, filmId);
         Set<Map<String, Object>> genres = new HashSet<>();
         while (sqlRowSet.next()) {
             genres.add(Map.of("id", sqlRowSet.getInt("GENRE_ID"),

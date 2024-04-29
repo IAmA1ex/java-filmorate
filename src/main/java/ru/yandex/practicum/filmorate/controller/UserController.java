@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping // создание пользователя
-    public User addUser(@Valid @RequestBody User userFromRequest) throws NotFoundException {
+    public User addUser(@Valid @RequestBody User userFromRequest) throws Exception {
         log.info(String.format("Request body: %s", userFromRequest.toString()));
         User user = userStorage.addUser(userFromRequest);
         log.info(String.format("Response body: %s", user.toString()));
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PutMapping // обновление пользователя
-    public User updateUser(@Valid @RequestBody User user) throws NotFoundException {
+    public User updateUser(@Valid @RequestBody User user) throws Exception {
         log.info(String.format("Request body: %s", user.toString()));
         userStorage.updateUser(user);
         User updatedUser = userStorage.getUser(user.getId());

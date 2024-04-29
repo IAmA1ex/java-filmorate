@@ -32,9 +32,10 @@ public class FilmDbStorage implements FilmStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Film addFilm(Film filmFromRequest) throws NotFoundException, BadRequestException {
+    public Film addFilm(Film filmFromRequest) throws Exception {
 
         try {
+
             Integer filmIdInDb;
             Integer ratingMpaId = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -76,14 +77,19 @@ public class FilmDbStorage implements FilmStorage {
                 throw new BadRequestException("MPA id is not found.");
             } else if (e.getMessage().contains("FOREIGN KEY(GENRE_ID)")) {
                 throw new BadRequestException("Genre id is not found.");
+            } else if (e.getMessage().contains("A film with that name and release date already exists.")) {
+                throw new BadRequestException(e.getMessage());
+            } else if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new BadRequestException("Film already exist.");
             }
-            throw e;
+            throw new Exception("Error while adding film: " + filmFromRequest);
         }
     }
 
-    public Film updateFilm(Film filmFromRequest) throws NotFoundException, BadRequestException {
+    public Film updateFilm(Film filmFromRequest) throws Exception {
 
         try {
+
             Integer ratingMpaId = (Integer) filmFromRequest.getMpa().getOrDefault("id", null);
 
             String sql = "UPDATE films " +
@@ -111,6 +117,7 @@ public class FilmDbStorage implements FilmStorage {
             }
 
             return getFilm(filmFromRequest.getId());
+
         } catch (NotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -118,8 +125,10 @@ public class FilmDbStorage implements FilmStorage {
                 throw new BadRequestException("MPA id is not found.");
             } else if (e.getMessage().contains("FOREIGN KEY(GENRE_ID)")) {
                 throw new BadRequestException("Genre id is not found.");
+            } else if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new BadRequestException("Film already exist.");
             }
-            throw e;
+            throw new Exception("Error while updating film: " + filmFromRequest, e);
         }
     }
 

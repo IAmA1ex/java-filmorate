@@ -18,7 +18,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public UserFilmResponse setLike(Integer userId, Integer filmId) throws NotFoundException {
+    public UserFilmResponse setLike(Integer userId, Integer filmId) throws Exception {
         userStorage.setLike(userId, filmId);
         User user = userStorage.getUser(userId);
         Film film = filmStorage.getFilm(filmId);

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -9,9 +10,9 @@ public interface UserStorage {
 
     public boolean dbContainsUser(Integer userId);
 
-    public User addUser(User userFromRequest) throws NotFoundException;
+    public User addUser(User userFromRequest) throws Exception;
 
-    public User updateUser(User user) throws NotFoundException;
+    public User updateUser(User user) throws Exception;
 
     public List<User> getAllUsers();
 
@@ -29,7 +30,7 @@ public interface UserStorage {
 
     public Set<Integer> getLikedFilms(Integer userId);
 
-    public void setLike(Integer userId, Integer filmId);
+    public void setLike(Integer userId, Integer filmId) throws Exception;
 
     public void removeLike(Integer userId, Integer filmId);
 

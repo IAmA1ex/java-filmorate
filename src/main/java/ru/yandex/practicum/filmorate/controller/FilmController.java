@@ -24,7 +24,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @PostMapping // добавление фильма
-    public Film addFilm(@Valid @RequestBody Film filmFromRequest) throws NotFoundException, BadRequestException {
+    public Film addFilm(@Valid @RequestBody Film filmFromRequest) throws Exception {
         log.info(String.format("Request body: %s", filmFromRequest.toString()));
         Film film = filmStorage.addFilm(filmFromRequest);
         log.info(String.format("Response body: %s", film.toString()));
@@ -32,7 +32,7 @@ public class FilmController {
     }
 
     @PutMapping // обновление фильма
-    public Film updateFilm(@Valid @RequestBody Film film) throws NotFoundException, BadRequestException {
+    public Film updateFilm(@Valid @RequestBody Film film) throws Exception {
         log.info(String.format("Request body: %s", film.toString()));
         Film updatedFilm = filmStorage.updateFilm(film);
         log.info(String.format("Response body: %s", film.toString()));
@@ -56,7 +56,7 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public UserFilmResponse setLike(@PathVariable("id") Integer filmId,
-                                    @PathVariable Integer userId) throws NotFoundException {
+                                    @PathVariable Integer userId) throws Exception {
         log.info(String.format("Request body: film_id = %d, user_id = %d", filmId, userId));
         UserFilmResponse userFilmResponse = filmService.setLike(userId, filmId);
         log.info(String.format("Response body: %s", userFilmResponse.toString()));

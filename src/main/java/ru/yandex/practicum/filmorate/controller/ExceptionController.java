@@ -74,7 +74,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> internalServerError(final Exception e) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("error", e.getMessage());
+        response.put("error", e.getCause().getMessage());
         log.info("Exception. Response: " + response);
         return response;
     }

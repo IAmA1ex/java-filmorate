@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -23,39 +24,63 @@ public class UserDbStorage implements UserStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public User addUser(User userFromRequest) throws NotFoundException {
-        String sql = "INSERT INTO users (email, login, username, birthday) " +
-                "VALUES (?, ?, ?, ?); ";
+    public User addUser(User userFromRequest) throws Exception {
 
-        jdbcTemplate.update(sql, userFromRequest.getEmail(),
-                userFromRequest.getLogin(),
-                userFromRequest.getName(),
-                dateFormat.format(userFromRequest.getBirthday()));
+        try {
 
-        sql = "SELECT user_id " +
-                "FROM users " +
-                "WHERE login = ?; ";
+            if (userFromRequest.getName() == null || userFromRequest.getName().isEmpty())
+                userFromRequest.setName(userFromRequest.getLogin());
 
-        Integer id = jdbcTemplate.queryForObject(sql, new Object[]{userFromRequest.getLogin()}, Integer.class);
+            String sql = "INSERT INTO users (email, login, username, birthday) " +
+                    "VALUES (?, ?, ?, ?); ";
 
-        return getUser(id);
+            jdbcTemplate.update(sql, userFromRequest.getEmail(),
+                    userFromRequest.getLogin(),
+                    userFromRequest.getName(),
+                    dateFormat.format(userFromRequest.getBirthday()));
+
+            sql = "SELECT user_id " +
+                    "FROM users " +
+                    "WHERE login = ?; ";
+
+            Integer id = jdbcTemplate.queryForObject(sql, Integer.class, userFromRequest.getLogin());
+
+            return getUser(id);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new BadRequestException("User already exist.");
+            } else if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new Exception("Error while adding user: " + userFromRequest);
+        }
     }
 
-    public User updateUser(User user) throws NotFoundException {
-        String sql = "UPDATE users " +
-                "SET email = ?, login = ?, username = ?, birthday = ? " +
-                "WHERE user_id = ? " +
-                "AND NOT EXISTS (SELECT 1 FROM users WHERE (email = ? OR login = ?) AND user_id != ?); ";
-        jdbcTemplate.update(sql,
-                user.getEmail(),
-                user.getLogin(),
-                user.getName(),
-                dateFormat.format(user.getBirthday()),
-                user.getId(),
-                user.getEmail(),
-                user.getLogin(),
-                user.getId());
-        return getUser(user.getId());
+    public User updateUser(User user) throws Exception {
+
+        try {
+
+            if (user.getName() == null || user.getName().isEmpty())
+                user.setName(user.getLogin());
+
+            String sql = "UPDATE users " +
+                    "SET email = ?, login = ?, username = ?, birthday = ? " +
+                    "WHERE user_id = ?; ";
+            jdbcTemplate.update(sql,
+                    user.getEmail(),
+                    user.getLogin(),
+                    user.getName(),
+                    dateFormat.format(user.getBirthday()),
+                    user.getId());
+            return getUser(user.getId());
+        } catch (Exception e) {
+            if (e.getMessage().contains("Unique index or primary key violation")) {
+                throw new BadRequestException("User already exist.");
+            } else if (e instanceof NotFoundException) {
+                throw e;
+            }
+            throw new Exception("Error while updating user: " + user);
+        }
     }
 
     public List<User> getAllUsers() {
@@ -85,9 +110,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> getUsers(Set<Integer> id) {
-        String sql =
-                "SELECT * " +
-                        "FROM users" +
+        String sql = "SELECT * " +
+                        "FROM users " +
                         "WHERE user_id IN (?);";
         return jdbcTemplate.query(sql, id.toArray(), (rs, rowNum) -> makeUser(rs));
     }
@@ -143,14 +167,20 @@ public class UserDbStorage implements UserStorage {
         return new HashSet<>(jdbcTemplate.queryForList(sql, Integer.class, userId));
     }
 
-    public void setLike(Integer userId, Integer filmId) {
-        String sql =
-                "SET @u = ?; " +
-                        "SET @f = ?; " +
-                        "INSERT INTO liked_films (user_id, film_id) " +
-                        "SELECT @u, @f " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM liked_films WHERE user_id = @u AND film_id = @f); ";
-        jdbcTemplate.update(sql, userId, filmId);
+    public void setLike(Integer userId, Integer filmId) throws Exception {
+        try {
+            String sql = "INSERT INTO liked_films (user_id, film_id) " +
+                    "SELECT ?, ? " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM liked_films WHERE user_id = ? AND film_id = ?); ";
+            jdbcTemplate.update(sql, userId, filmId, userId, filmId);
+        } catch (Exception e) {
+            if (e.getMessage().contains("FOREIGN KEY(FILM_ID)")) {
+                throw new NotFoundException("Film not found.");
+            } else if (e.getMessage().contains("FOREIGN KEY(USER_ID)")) {
+                throw new NotFoundException("User not found.");
+            }
+            throw new Exception(String.format("Error while setting like: %d, %d", userId, filmId));
+        }
     }
 
     public void removeLike(Integer userId, Integer filmId) {

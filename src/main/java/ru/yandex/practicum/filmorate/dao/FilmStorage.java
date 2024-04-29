@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface FilmStorage {
 
-    public Film addFilm(Film filmFromRequest) throws NotFoundException, BadRequestException;
+    public Film addFilm(Film filmFromRequest) throws Exception;
 
-    public Film updateFilm(Film filmFromRequest) throws NotFoundException, BadRequestException;
+    public Film updateFilm(Film filmFromRequest) throws Exception;
 
     public List<Film> getAllFilms();
 

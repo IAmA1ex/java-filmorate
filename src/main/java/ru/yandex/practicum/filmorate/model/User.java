@@ -9,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -32,8 +31,10 @@ public class User {
     @NotNull(message = "The birthday date cannot be null.")
     private LocalDate birthday;
 
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends;
 
-    private final Set<Integer> likedFilms = new HashSet<>();
+    private Set<Integer> likedFilms;
+
+
 
 }
